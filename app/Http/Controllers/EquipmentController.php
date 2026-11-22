@@ -30,7 +30,7 @@ class EquipmentController extends Controller
      */
     public function store(Request $request)
     {
-      $request->validate([
+      $validated = $request->validate([
         'equipment_name'=> 'required|string|max:255',
         'category'=> 'required|string|max:255',
         'unit_price'=> 'required|numeric|min:0',
@@ -38,10 +38,9 @@ class EquipmentController extends Controller
         'availability_status'=> 'required|in:Available,Unavailable,Maintenance',
       ]);
       
-      equipment::create([
-        ...$request->validated(),
+      equipment::create(array_merge($validated, [
         'user_id' => Auth::id(),
-      ]);
+      ]));
       return redirect()->route('equipments.index')->with('success','Equipment created successfully.');
     }
 
@@ -68,7 +67,7 @@ class EquipmentController extends Controller
      */
     public function update(Request $request, equipment $equipment)
     {
-        $request->validate([
+        $validated = $request->validate([
         'equipment_name'=> 'required|string|max:255',
         'category'=> 'required|string|max:255',
         'unit_price'=> 'required|numeric|min:0',
@@ -77,7 +76,7 @@ class EquipmentController extends Controller
       ]);
       
       abort_unless($equipment->user_id === Auth::id(), 403);
-      $equipment -> update($request->all());
+      $equipment->update($validated);
       return redirect()->route('equipments.index')->with('success','Equipment updated successfully.');
     }
 
